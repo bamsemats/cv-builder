@@ -6,8 +6,8 @@ export const defaultCV = {
     phone: "+1 234 567 890",
     address: "City, Country",
     website: "www.yourwebsite.com",
-    image: null, // base64 image data
-    summary: "Brief professional summary about yourself."
+    image: null,
+    summary: "Brief professional summary about yourself. Highlight your key strengths and what you're looking for."
   },
   experience: [
     {
@@ -39,9 +39,10 @@ export const defaultCV = {
     { id: "lang-1", name: "Language Name", level: "Native" }
   ],
   settings: {
-    layout: "modern", // minimalist, modern, classic
-    primaryColor: "#000000",
-    secondaryColor: "#666666",
+    layout: "modern", // "modern", "minimalist", "executive"
+    primaryColor: "#3b82f6",
+    secondaryColor: "#1e293b",
+    textColor: "#111827",
     fontFamily: "Inter"
   }
 };

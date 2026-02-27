@@ -1,11 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { defaultCV } from "./constants/defaultCV";
+import PersonalInfoForm from "./components/forms/PersonalInfoForm";
+import ExperienceForm from "./components/forms/ExperienceForm";
+import EducationForm from "./components/forms/EducationForm";
+import SkillsForm from "./components/forms/SkillsForm";
+import SettingsForm from "./components/forms/SettingsForm";
+import ModernTemplate from "./components/templates/ModernTemplate";
+import MinimalistTemplate from "./components/templates/MinimalistTemplate";
+import ExecutiveTemplate from "./components/templates/ExecutiveTemplate";
+import { Download, Loader2 } from "lucide-react";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 import "./App.css";
 
 function App() {
-  const [cvData, setCvData] = useState(defaultCV);
+  const [cvData, setCvData] = useState(() => {
+    const saved = localStorage.getItem("cv-data");
+    return saved ? JSON.parse(saved) : defaultCV;
+  });
+  const [isExporting, setIsExporting] = useState(false);
 
-  // Handlers for state updates
+  useEffect(() => {
+    localStorage.setItem("cv-data", JSON.stringify(cvData));
+  }, [cvData]);
+
   const handlePersonalUpdate = (field, value) => {
     setCvData((prev) => ({
       ...prev,
@@ -36,11 +54,66 @@ function App() {
     }));
   };
 
-  const handleImageUpdate = (imageData) => {
+  const handleSettingsUpdate = (field, value) => {
     setCvData((prev) => ({
       ...prev,
-      personal: { ...prev.personal, image: imageData },
+      settings: { ...prev.settings, [field]: value },
     }));
+  };
+
+  const handleReset = () => {
+    if (window.confirm("Are you sure you want to clear all data and reset to defaults? This action cannot be undone.")) {
+      setCvData(defaultCV);
+      localStorage.removeItem("cv-data");
+    }
+  };
+
+  const exportPDF = async () => {
+    const element = document.getElementById("cv-preview");
+    if (!element) return;
+
+    setIsExporting(true);
+
+    try {
+      // Use a higher scale for better PDF quality
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/jpeg", 1.0);
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${cvData.personal.fullName.replace(/\s+/g, "_")}_CV.pdf`);
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Failed to export PDF. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const renderTemplate = () => {
+    switch (cvData.settings.layout) {
+      case "minimalist":
+        return <MinimalistTemplate data={cvData} />;
+      case "executive":
+        return <ExecutiveTemplate data={cvData} />;
+      case "modern":
+      default:
+        return <ModernTemplate data={cvData} />;
+    }
   };
 
   return (
@@ -53,43 +126,61 @@ function App() {
         </header>
         
         <div className="form-sections">
-          {/* We'll add form components here */}
-          <section className="form-section">
-            <h3>Personal Information</h3>
-            <input 
-              type="text" 
-              placeholder="Full Name" 
-              value={cvData.personal.fullName}
-              onChange={(e) => handlePersonalUpdate("fullName", e.target.value)}
-            />
-            {/* More fields to come */}
-          </section>
+          <SettingsForm 
+            settings={cvData.settings} 
+            onUpdate={handleSettingsUpdate} 
+          />
+          <PersonalInfoForm 
+            personal={cvData.personal} 
+            onUpdate={handlePersonalUpdate} 
+          />
+          <ExperienceForm 
+            experience={cvData.experience} 
+            onUpdate={handleListUpdate}
+            onAdd={addListItem}
+            onRemove={removeListItem}
+          />
+          <EducationForm 
+            education={cvData.education} 
+            onUpdate={handleListUpdate}
+            onAdd={addListItem}
+            onRemove={removeListItem}
+          />
+          <SkillsForm 
+            skills={cvData.skills} 
+            onUpdate={handleListUpdate}
+            onAdd={addListItem}
+            onRemove={removeListItem}
+          />
         </div>
 
         <div className="panel-actions">
-          <button className="btn-export">Export PDF</button>
+          <button 
+            className="btn-export" 
+            onClick={exportPDF}
+            disabled={isExporting}
+          >
+            {isExporting ? (
+              <Loader2 className="animate-spin" size={18} />
+            ) : (
+              <Download size={18} />
+            )}
+            {isExporting ? "Exporting..." : "Export PDF"}
+          </button>
+          
+          <button 
+            className="btn-reset"
+            onClick={handleReset}
+          >
+            Reset to Defaults
+          </button>
         </div>
       </aside>
 
       {/* Preview Pane (Light Theme) */}
       <main className="preview-pane">
         <div className="preview-container" id="cv-preview">
-          {/* We'll add the CV template here */}
-          <div className="cv-paper modern">
-             <header className="cv-header">
-               <h1>{cvData.personal.fullName}</h1>
-               <p className="cv-title">{cvData.personal.title}</p>
-             </header>
-             <section className="cv-section">
-               <h2>Experience</h2>
-               {cvData.experience.map(exp => (
-                 <div key={exp.id} className="cv-entry">
-                   <h3>{exp.position} at {exp.company}</h3>
-                   <p>{exp.startDate} - {exp.endDate}</p>
-                 </div>
-               ))}
-             </section>
-          </div>
+          {renderTemplate()}
         </div>
       </main>
     </div>
