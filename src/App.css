@@ -7,7 +7,7 @@
   --accent: #2563eb;
   --danger: #ef4444;
   --white: #ffffff;
-  --bg-preview: #f3f4f6;
+  --bg-preview: #fff;
   --paper-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
   --paper-bg: #ffffff;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -138,6 +138,55 @@ input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--primary);
   background-color: #333;
+}
+
+/* Import Section */
+.import-section {
+  margin-bottom: 2rem;
+}
+
+.import-dropzone {
+  background-color: #262626;
+  border: 2px dashed #444;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.import-dropzone:hover {
+  border-color: var(--primary);
+  background-color: #2d2d2d;
+}
+
+.import-dropzone.success {
+  border-color: #10b981;
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+.import-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.import-status .icon {
+  color: var(--text-muted);
+}
+
+.import-status p {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.import-status span {
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Settings Styling */
@@ -330,6 +379,9 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: 4rem;
   position: relative;
   overflow: hidden; /* Important for full-height sidebars */
+  corner-shape: squircle;
+  border-radius: 12px;
+  border-color: none;
 }
 
 /* Common Template Typography */
@@ -360,6 +412,8 @@ input:focus, textarea:focus, select:focus {
   padding: 2.5rem 1.75rem;
   display: flex;
   flex-direction: column;
+  corner-shape: squircle;
+  border-radius: 12px 0px 0px 12px;
 }
 
 .modern-image-container {
@@ -393,6 +447,7 @@ input:focus, textarea:focus, select:focus {
   flex-direction: column;
   gap: 1.25rem;
   margin-bottom: 3rem;
+  margin-top: 0.25rem;
 }
 
 .modern-contact-item {
@@ -401,6 +456,10 @@ input:focus, textarea:focus, select:focus {
   gap: 0.75rem;
   font-size: 0.85rem;
   opacity: 0.9;
+}
+
+.modern-skills-list {
+  margin-top: 0.25rem;
 }
 
 .modern-skill-item {
@@ -483,6 +542,7 @@ input:focus, textarea:focus, select:focus {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.25rem;
+  margin-top: 0.5rem;
 }
 
 .entry-period {

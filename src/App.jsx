@@ -5,13 +5,9 @@ import ExperienceForm from "./components/forms/ExperienceForm";
 import EducationForm from "./components/forms/EducationForm";
 import SkillsForm from "./components/forms/SkillsForm";
 import SettingsForm from "./components/forms/SettingsForm";
+import ImportCV from "./components/forms/ImportCV";
 import ModernTemplate from "./components/templates/ModernTemplate";
-import MinimalistTemplate from "./components/templates/MinimalistTemplate";
-import ExecutiveTemplate from "./components/templates/ExecutiveTemplate";
-import { Download, Loader2 } from "lucide-react";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
-import "./App.css";
+// ... (rest of imports)
 
 function App() {
   const [cvData, setCvData] = useState(() => {
@@ -29,6 +25,18 @@ function App() {
       ...prev,
       personal: { ...prev.personal, [field]: value },
     }));
+  };
+
+  const handleImport = (parsedData) => {
+    if (window.confirm("Do you want to import this data? It will merge with your existing CV information.")) {
+      setCvData((prev) => ({
+        ...prev,
+        personal: { ...prev.personal, ...parsedData.personal },
+        experience: parsedData.experience.length > 0 ? parsedData.experience : prev.experience,
+        education: parsedData.education.length > 0 ? parsedData.education : prev.education,
+        skills: parsedData.skills.length > 0 ? parsedData.skills : prev.skills
+      }));
+    }
   };
 
   const handleListUpdate = (type, id, field, value) => {
@@ -126,6 +134,7 @@ function App() {
         </header>
         
         <div className="form-sections">
+          <ImportCV onImport={handleImport} />
           <SettingsForm 
             settings={cvData.settings} 
             onUpdate={handleSettingsUpdate} 
