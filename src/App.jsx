@@ -7,7 +7,12 @@ import SkillsForm from "./components/forms/SkillsForm";
 import SettingsForm from "./components/forms/SettingsForm";
 import ImportCV from "./components/forms/ImportCV";
 import ModernTemplate from "./components/templates/ModernTemplate";
-// ... (rest of imports)
+import MinimalistTemplate from "./components/templates/MinimalistTemplate";
+import ExecutiveTemplate from "./components/templates/ExecutiveTemplate";
+import { Download, Loader2 } from "lucide-react";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
+import "./App.css";
 
 function App() {
   const [cvData, setCvData] = useState(() => {
