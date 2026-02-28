@@ -378,10 +378,7 @@ input:focus, textarea:focus, select:focus {
   box-sizing: border-box;
   margin-bottom: 4rem;
   position: relative;
-  overflow: hidden; /* Important for full-height sidebars */
-  corner-shape: squircle;
-  border-radius: 12px;
-  border-color: none;
+  border-radius: 4px;
 }
 
 /* Common Template Typography */
@@ -396,8 +393,8 @@ input:focus, textarea:focus, select:focus {
 
 /* MODERN TEMPLATE (SIDEBAR) */
 .modern-layout {
-  height: 100%;
   min-height: 297mm;
+  height: auto;
 }
 
 .modern-grid {
@@ -730,7 +727,7 @@ input:focus, textarea:focus, select:focus {
 .panel-actions {
   margin-top: 2rem;
   position: sticky;
-  bottom: 0;
+  bottom: -2.5rem;
   background-color: var(--bg-panel);
   padding: 1.5rem 0;
   z-index: 5;

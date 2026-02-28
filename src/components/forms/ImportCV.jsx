@@ -50,74 +50,167 @@ const ImportCV = ({ onImport }) => {
   };
 
   const parseCVText = (text) => {
-    const lines = text.split("").map(line => line.trim()).filter(line => line.length > 0);
+    const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
     const data = {
-      personal: {},
+      personal: {
+        fullName: "",
+        title: "Your Professional Title",
+        email: "",
+        phone: "",
+        address: "City, Country",
+        website: "www.yourwebsite.com",
+        summary: "Brief professional summary about yourself. Highlight your key strengths and what you're looking for."
+      },
       experience: [],
       education: [],
       skills: []
     };
 
-    // 1. Basic Personal Info Extraction
-    // Assume first line is Name
-    if (lines.length > 0) data.personal.fullName = lines[0];
-
     const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
     const phoneRegex = /(\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9})/g;
+    const urlRegex = /(www\.[a-z0-9.-]+\.[a-z]{2,}|https?:\/\/[^\s]+)/gi;
 
-    const emailMatch = text.match(emailRegex);
-    if (emailMatch) data.personal.email = emailMatch[0];
+    // 1. Extract Personal Info from the top of the file
+    let headerLines = lines.slice(0, 10);
+    let nameFound = false;
+    
+    headerLines.forEach((line) => {
+      // First non-empty line that isn't contact info is likely the name
+      if (!nameFound && !line.match(emailRegex) && !line.match(phoneRegex) && !line.match(urlRegex) && line.length > 2 && !/experience|education|skills/i.test(line)) {
+        data.personal.fullName = line;
+        nameFound = true;
+        return;
+      }
 
-    const phoneMatch = text.match(phoneRegex);
-    if (phoneMatch) data.personal.phone = phoneMatch[0];
+      const emailMatch = line.match(emailRegex);
+      if (emailMatch && !data.personal.email) data.personal.email = emailMatch[0];
 
-    // 2. Section Splitting
+      const phoneMatch = line.match(phoneRegex);
+      if (phoneMatch && !data.personal.phone) data.personal.phone = phoneMatch[0];
+
+      const urlMatch = line.match(urlRegex);
+      if (urlMatch && !data.personal.website) data.personal.website = urlMatch[0];
+
+      // Address heuristic: common patterns for city/state
+      if (!line.match(emailRegex) && !line.match(phoneRegex) && !line.match(urlRegex)) {
+        if (line.match(/[A-Z][a-z]+, [A-Z]{2}/) || line.match(/[A-Z][a-z]+ [A-Z]{2} \d{5}/)) {
+           data.personal.address = line;
+        }
+      }
+    });
+
+    // 2. Section Parsing
     let currentSection = "";
     
     lines.forEach((line, index) => {
       const lowerLine = line.toLowerCase();
       
-      if (lowerLine.includes("experience") || lowerLine.includes("work history") || lowerLine.includes("employment")) {
+      if (/experience|work history|employment|career/i.test(lowerLine)) {
         currentSection = "experience";
         return;
       }
-      if (lowerLine.includes("education") || lowerLine.includes("academic")) {
+      if (/education|academic|studies/i.test(lowerLine)) {
         currentSection = "education";
         return;
       }
-      if (lowerLine.includes("skills") || lowerLine.includes("expertise")) {
+      if (/skills|expertise|technologies|proficiencies/i.test(lowerLine)) {
         currentSection = "skills";
         return;
       }
 
-      // Simple heuristic for parsing entries
-      if (currentSection === "experience" && line.length > 5) {
-        // Very basic: just add as a description/summary for now
-        // A better parser would look for dates and titles
-        if (data.experience.length === 0 || line.match(/\d{4}/)) {
-           data.experience.push({ id: `exp-${Date.now()}-${index}`, position: line, company: "Company Name", location: "Location", startDate: "Date", endDate: "Date", description: "" });
-        } else {
-           data.experience[data.experience.length - 1].description += line + "";
-        }
-      }
-
-      if (currentSection === "education" && line.length > 5) {
-        if (data.education.length === 0 || line.match(/\d{4}/)) {
-          data.education.push({ id: `edu-${Date.now()}-${index}`, degree: line, school: "Institution", location: "Location", startDate: "Date", endDate: "Date", description: "" });
-        } else {
-          data.education[data.education.length - 1].description += line + "";
-        }
-      }
-
-      if (currentSection === "skills" && line.length > 2) {
-        // Split by commas if present
-        if (line.includes(",")) {
-          line.split(",").forEach(s => {
-            if (s.trim()) data.skills.push({ id: `skill-${Date.now()}-${index}-${s}`, name: s.trim(), level: "Intermediate" });
+      if (currentSection === "experience") {
+        // Experience heuristics:
+        // Pattern: Title | Company | Location
+        if (line.includes("|")) {
+          const parts = line.split("|").map(p => p.trim());
+          data.experience.push({
+            id: `exp-${Date.now()}-${index}`,
+            position: parts[0] || "Job Title",
+            company: parts[1] || "Company Name",
+            location: parts[2] || "Location",
+            startDate: "",
+            endDate: "",
+            description: ""
           });
-        } else {
-          data.skills.push({ id: `skill-${Date.now()}-${index}`, name: line, level: "Intermediate" });
+        } else if (/\d{4}/.test(line) && (line.includes("-") || line.toLowerCase().includes("present"))) {
+          // Date line
+          const lastExp = data.experience[data.experience.length - 1];
+          if (lastExp && !lastExp.startDate) {
+            const dates = line.split(/[–-]/).map(d => d.trim());
+            lastExp.startDate = dates[0] || "";
+            lastExp.endDate = dates[1] || "";
+          } else {
+            // If we have a date line but no entry yet, or it's a new entry
+            data.experience.push({
+              id: `exp-${Date.now()}-${index}`,
+              position: "Job Title",
+              company: "Company Name",
+              location: "Location",
+              startDate: line.split(/[–-]/)[0]?.trim() || "",
+              endDate: line.split(/[–-]/)[1]?.trim() || "",
+              description: ""
+            });
+          }
+        } else if (line.startsWith("-") || line.startsWith("•") || line.startsWith("*")) {
+          const lastExp = data.experience[data.experience.length - 1];
+          if (lastExp) {
+            lastExp.description += (lastExp.description ? "\n" : "") + line;
+          }
+        } else if (line.length > 5 && data.experience.length > 0) {
+          // If it's a long line and we have an entry, it might be a description or a title
+          const lastExp = data.experience[data.experience.length - 1];
+          if (lastExp.description || line.length > 40) {
+            lastExp.description += (lastExp.description ? "\n" : "") + line;
+          } else if (lastExp.position === "Job Title") {
+             lastExp.position = line;
+          }
         }
+      }
+
+      if (currentSection === "education") {
+        if (line.includes("|")) {
+          const parts = line.split("|").map(p => p.trim());
+          data.education.push({
+            id: `edu-${Date.now()}-${index}`,
+            degree: parts[0] || "Degree Title",
+            school: parts[1] || "Institution",
+            location: parts[2] || "Location",
+            startDate: "",
+            endDate: "",
+            description: ""
+          });
+        } else if (/\d{4}/.test(line)) {
+          const lastEdu = data.education[data.education.length - 1];
+          if (lastEdu && !lastEdu.startDate) {
+            const dates = line.split(/[–-]/).map(d => d.trim());
+            lastEdu.startDate = dates[0] || "";
+            lastEdu.endDate = dates[1] || "";
+          } else {
+             data.education.push({
+              id: `edu-${Date.now()}-${index}`,
+              degree: "Degree Title",
+              school: "Institution",
+              location: "Location",
+              startDate: line.split(/[–-]/)[0]?.trim() || "",
+              endDate: line.split(/[–-]/)[1]?.trim() || "",
+              description: ""
+            });
+          }
+        } else if (line.length > 5 && data.education.length > 0) {
+           const lastEdu = data.education[data.education.length - 1];
+           if (lastEdu.degree === "Degree Title") {
+             lastEdu.degree = line;
+           } else {
+             lastEdu.description += (lastEdu.description ? "\n" : "") + line;
+           }
+        }
+      }
+
+      if (currentSection === "skills") {
+        const skillsList = line.split(/[,|•]/).map(s => s.trim()).filter(s => s.length > 1);
+        skillsList.forEach(s => {
+          data.skills.push({ id: `skill-${Date.now()}-${index}-${s}`, name: s, level: "Intermediate" });
+        });
       }
     });
 

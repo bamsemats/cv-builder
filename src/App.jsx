@@ -33,7 +33,7 @@ function App() {
   };
 
   const handleImport = (parsedData) => {
-    if (window.confirm("Do you want to import this data? It will merge with your existing CV information.")) {
+    if (window.confirm("Do you want to import this data? This will update your personal info and replace your current experience, education, and skills sections.")) {
       setCvData((prev) => ({
         ...prev,
         personal: { ...prev.personal, ...parsedData.personal },
@@ -88,12 +88,14 @@ function App() {
     setIsExporting(true);
 
     try {
-      // Use a higher scale for better PDF quality
+      const scale = 2; // Keep high resolution
       const canvas = await html2canvas(element, {
-        scale: 2,
+        scale: scale,
         useCORS: true,
         logging: false,
         backgroundColor: "#ffffff",
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight
       });
 
       const imgData = canvas.toDataURL("image/jpeg", 1.0);
@@ -103,11 +105,50 @@ function App() {
         format: "a4",
       });
 
-      const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Calculate how many pixels represent one A4 page in our canvas
+      // canvas.width / scale is the original CSS width
+      // ratio is pdfHeight / pdfWidth
+      const canvasPageHeight = (canvas.width / pdfWidth) * pdfHeight;
+      const totalCanvasHeight = canvas.height;
+      
+      let heightLeft = totalCanvasHeight;
+      let position = 0;
+      let pageNumber = 1;
 
-      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+      // Add the first page
+      pdf.addImage(
+        imgData, 
+        "JPEG", 
+        0, 
+        0, 
+        pdfWidth, 
+        (totalCanvasHeight * pdfWidth) / canvas.width,
+        undefined,
+        'FAST'
+      );
+      heightLeft -= canvasPageHeight;
+
+      // Add subsequent pages if necessary
+      while (heightLeft > 0) {
+        position = -(pageNumber * pdfHeight);
+        pdf.addPage();
+        pdf.addImage(
+          imgData, 
+          "JPEG", 
+          0, 
+          position, 
+          pdfWidth, 
+          (totalCanvasHeight * pdfWidth) / canvas.width,
+          undefined,
+          'FAST'
+        );
+        heightLeft -= canvasPageHeight;
+        pageNumber++;
+      }
+
       pdf.save(`${cvData.personal.fullName.replace(/\s+/g, "_")}_CV.pdf`);
     } catch (error) {
       console.error("Export failed:", error);
