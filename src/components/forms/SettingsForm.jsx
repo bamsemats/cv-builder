@@ -12,7 +12,7 @@ const SettingsForm = ({ settings, onUpdate }) => {
     { name: "Sky Blue", primary: "#3b82f6", secondary: "#1e293b" },
     { name: "Emerald", primary: "#10b981", secondary: "#064e3b" },
     { name: "Rose", primary: "#f43f5e", secondary: "#4c0519" },
-    { name: "Slate", primary: "#334155", secondary: "#0f172a" },
+    { name: "Slate", primary: "#405D87", secondary: "#0f172a" },
     { name: "Amber", primary: "#f59e0b", secondary: "#451a03" },
   ];
 

@@ -140,6 +140,47 @@ input:focus, textarea:focus, select:focus {
   background-color: #333;
 }
 
+input.input-error, textarea.input-error {
+  border-color: var(--danger);
+}
+
+.error-message {
+  color: var(--danger);
+  font-size: 0.75rem;
+  margin-top: -0.5rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.skill-item-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  background-color: #262626;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #333;
+}
+
+.skill-item-row .input-group {
+  flex: 1;
+}
+
+.skill-item-row select {
+  width: auto;
+  min-width: 120px;
+}
+
 /* Import Section */
 .import-section {
   margin-bottom: 2rem;

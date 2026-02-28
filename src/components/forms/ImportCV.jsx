@@ -54,11 +54,11 @@ const ImportCV = ({ onImport }) => {
     const data = {
       personal: {
         fullName: "",
-        title: "Your Professional Title",
+        title: "",
         email: "",
         phone: "",
-        address: "City, Country",
-        website: "www.yourwebsite.com",
+        address: "",
+        website: "",
         summary: "Brief professional summary about yourself. Highlight your key strengths and what you're looking for."
       },
       experience: [],
@@ -71,33 +71,61 @@ const ImportCV = ({ onImport }) => {
     const urlRegex = /(www\.[a-z0-9.-]+\.[a-z]{2,}|https?:\/\/[^\s]+)/gi;
 
     // 1. Extract Personal Info from the top of the file
-    let headerLines = lines.slice(0, 10);
+    let headerLines = [];
+    for (let i = 0; i < Math.min(lines.length, 15); i++) {
+      if (/experience|education|skills|work history|employment/i.test(lines[i])) break;
+      headerLines.push(lines[i]);
+    }
+
     let nameFound = false;
-    
+    let titleFound = false;
     headerLines.forEach((line) => {
-      // First non-empty line that isn't contact info is likely the name
-      if (!nameFound && !line.match(emailRegex) && !line.match(phoneRegex) && !line.match(urlRegex) && line.length > 2 && !/experience|education|skills/i.test(line)) {
-        data.personal.fullName = line;
-        nameFound = true;
+      const emailMatch = line.match(emailRegex);
+      const phoneMatch = line.match(phoneRegex);
+      const urlMatch = line.match(urlRegex);
+
+      if (emailMatch && !data.personal.email) {
+        data.personal.email = emailMatch[0];
         return;
       }
 
-      const emailMatch = line.match(emailRegex);
-      if (emailMatch && !data.personal.email) data.personal.email = emailMatch[0];
+      if (phoneMatch && !data.personal.phone) {
+        data.personal.phone = phoneMatch[0];
+        return;
+      }
 
-      const phoneMatch = line.match(phoneRegex);
-      if (phoneMatch && !data.personal.phone) data.personal.phone = phoneMatch[0];
-
-      const urlMatch = line.match(urlRegex);
-      if (urlMatch && !data.personal.website) data.personal.website = urlMatch[0];
+      if (urlMatch && !data.personal.website) {
+        data.personal.website = urlMatch[0];
+        return;
+      }
 
       // Address heuristic: common patterns for city/state
-      if (!line.match(emailRegex) && !line.match(phoneRegex) && !line.match(urlRegex)) {
-        if (line.match(/[A-Z][a-z]+, [A-Z]{2}/) || line.match(/[A-Z][a-z]+ [A-Z]{2} \d{5}/)) {
-           data.personal.address = line;
+      if (line.match(/[A-Z][a-z]+, [A-Z]{2}/) || line.match(/[A-Z][a-z]+ [A-Z]{2} \d{5}/)) {
+        if (!data.personal.address || line.length < data.personal.address.length) {
+          data.personal.address = line;
+          return;
+        }
+      }
+
+      // If it's not contact info, it's either name or title
+      if (line.length > 2) {
+        if (!nameFound) {
+          data.personal.fullName = line;
+          nameFound = true;
+        } else if (!titleFound) {
+          data.personal.title = line;
+          titleFound = true;
         }
       }
     });
+
+    // Fallback for empty fields to maintain default look if nothing found
+    if (!data.personal.title) data.personal.title = "Your Professional Title";
+    if (!data.personal.address) data.personal.address = "City, Country";
+    if (!data.personal.website) data.personal.website = "www.yourwebsite.com";
+    if (!data.personal.fullName) data.personal.fullName = "Your Name";
+    if (!data.personal.email) data.personal.email = "your@email.com";
+    if (!data.personal.phone) data.personal.phone = "+1 234 567 890";
 
     // 2. Section Parsing
     let currentSection = "";
