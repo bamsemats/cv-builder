@@ -1,16 +1,69 @@
-# React + Vite
+# Professional CV Architect
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A dynamic, React-based application designed for generating polished, print-ready PDF CVs in real-time. This tool combines a user-friendly form engine with professional templates and a robust CV parsing system.
 
-Currently, two official plugins are available:
+## 🚀 Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Dynamic Form Engine**: Categorized interface for Personal Info, Experience, Education, and Skills with real-time state updates.
+- **Intelligent CV Import**: Rule-based parsing for `.txt` and `.docx` (via `mammoth.js`) files with refined heuristic text extraction.
+- **Advanced Image Handling**: Profile picture upload with integrated cropping powered by `react-easy-crop`.
+- **Professional Templates**: Three distinct layouts—**Modern**, **Minimalist**, and **Executive**—optimized for readability.
+- **Deep Customization**: Adjust primary/secondary color schemes, layout settings, and modern typography selections.
+- **High-Quality PDF Export**: 2x scale PDF generation via `html2canvas` and `jsPDF`, featuring multi-page canvas slicing support.
+- **State Persistence**: Automatic `localStorage` saving ensures your data is never lost, with "Reset to Defaults" functionality.
+- **Modern UI**: Dark-themed senior Control Panel contrasted with a modernized "Paper" preview.
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: React 19 (Vite)
+- **Styling**: Vanilla CSS (Surgical control over PDF layouts)
+- **PDF Generation**: `html2canvas` & `jsPDF`
+- **File Parsing**: `mammoth.js` (DOCX extraction)
+- **Icons**: `lucide-react`
+- **Animation**: `framer-motion`
+- **Image Cropping**: `react-easy-crop`
 
-## Expanding the ESLint configuration
+## 🏁 Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+- Node.js (v18+)
+- npm
+
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/bamsemats/cv-builder.git
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+### Deployment
+Build the project and deploy to GitHub Pages:
+```bash
+npm run deploy
+```
+
+## 🏗️ Project Structure
+
+- `src/components/forms/`: Individual modules for CV data entry and file importing.
+- `src/components/templates/`: Print-ready layout components for the PDF preview.
+- `src/constants/`: Default data structures and configuration.
+- `src/App.jsx`: Central state management and application logic.
+
+## 📈 Roadmap & Progress
+
+- [x] Robust CV heuristic parsing for specialized TLDs and addresses.
+- [x] Multi-page PDF export logic.
+- [x] Real-time form validation and visual feedback.
+- [ ] Data Export/Import: Download/Upload CV data as `.json` for backup.
+- [ ] Advanced PDF Parsing: Investigating `pdfjs-dist` for direct PDF resume reading.
+- [ ] Refined Professional Title Logic in heuristics.
+
+---
+Built with ❤️ for professional career development.
