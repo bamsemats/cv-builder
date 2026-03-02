@@ -38,6 +38,19 @@ body {
   box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
   z-index: 10;
   overflow-y: auto;
+  transition: transform 0.3s ease;
+}
+
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background-color: var(--bg-panel);
+  border-top: 1px solid #333;
+  z-index: 1000;
 }
 
 .panel-header h1 {
@@ -351,13 +364,90 @@ input.input-error, textarea.input-error {
   cursor: pointer;
 }
 
-.crop-actions {
+.btn-cancel {
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid #333;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-save-crop {
+  padding: 0.75rem 1.25rem;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.add-btn {
+  color: var(--primary);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.add-btn:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+}
+
+.delete-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+.color-presets {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.color-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #333;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.color-btn:hover {
+  transform: scale(1.1);
+  border-color: white;
+}
+
+.custom-colors {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-/* Custom Color Picker Styling */
 .color-picker-wrap {
   display: flex;
   flex-direction: column;
@@ -413,13 +503,15 @@ input.input-error, textarea.input-error {
 
 .preview-container {
   width: 210mm;
+  min-width: 210mm; /* CRITICAL: Prevents horizontal squishing/distortion */
   min-height: 297mm;
   background-color: var(--paper-bg);
   box-shadow: var(--paper-shadow);
   box-sizing: border-box;
-  margin-bottom: 4rem;
+  margin: 0 auto 4rem auto; /* Centered with margin for stability */
   position: relative;
   border-radius: 4px;
+  flex-shrink: 0; /* Ensures it never shrinks below 210mm */
 }
 
 /* Common Template Typography */
@@ -806,6 +898,14 @@ input.input-error, textarea.input-error {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.btn-reset-icon {
+  display: none; /* Only show in mobile media query */
 }
 
 .btn-reset:hover {
@@ -836,4 +936,196 @@ input.input-error, textarea.input-error {
 
 .animate-spin {
   animation: spin 1s linear infinite;
+}
+
+/* --- RESPONSIVE DESIGN (Media Queries) --- */
+
+/* Tablet & Mobile Switches */
+@media (max-width: 1024px) {
+  :root {
+    --cv-scale: 0.75;
+  }
+
+  body {
+    overflow: hidden; /* Prevent double scrollbars */
+  }
+
+  .app-container {
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+
+  .mobile-nav {
+    display: flex;
+  }
+
+  .mobile-nav button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    padding: 0;
+  }
+
+  .mobile-nav button.active {
+    color: var(--primary);
+  }
+
+  .control-panel {
+    width: 100%;
+    padding: 1.5rem;
+    box-shadow: none;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+  }
+
+  .control-panel.hidden {
+    display: none;
+  }
+
+  .preview-pane {
+    width: 100%;
+    padding: 0;
+    height: calc(100vh - 70px);
+    background-color: #f3f4f6;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Horizontally center the scaled content */
+    position: relative;
+  }
+
+  .preview-pane.hidden {
+    display: none;
+  }
+
+  .preview-container {
+    width: 210mm;
+    min-width: 210mm; /* Force dimensions to prevent squishing */
+    min-height: 297mm;
+    transform: scale(var(--cv-scale));
+    transform-origin: top center;
+    /* Margin top provides spacing, margin-bottom compensates for the massive empty space left by the unscaled height */
+    margin: 40px auto calc(-297mm * (1 - var(--cv-scale)) + 40px) auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    display: block;
+    flex-shrink: 0; /* Prevent flexbox from trying to shrink it */
+  }
+
+  .form-sections {
+    margin-top: 1.5rem;
+  }
+
+  /* Action Buttons Row on Mobile */
+  .panel-actions {
+    position: relative;
+    margin-top: 2rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid #333;
+    flex-direction: row;
+    gap: 0.75rem;
+    bottom: auto;
+    z-index: 1;
+  }
+
+  .btn-export, .btn-reset {
+    flex: 1;
+    padding: 0.75rem 0.5rem;
+    font-size: 0.85rem;
+    height: 48px;
+    border-radius: 8px;
+  }
+
+  .btn-reset-icon {
+    display: block;
+  }
+}
+
+/* Medium Mobile (Small Tablets/Large Phones) */
+@media (max-width: 768px) {
+  :root {
+    --cv-scale: 0.65;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 600px) {
+  :root {
+    --cv-scale: 0.55;
+  }
+
+  .panel-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .form-item {
+    padding: 1rem;
+  }
+
+  .date-range {
+    grid-template-columns: 1fr;
+  }
+
+  .crop-modal {
+    max-height: 90vh;
+  }
+
+  .crop-container {
+    height: 300px;
+  }
+
+  /* Condense text if space is tight */
+  .panel-actions button span {
+    font-size: 0.75rem;
+  }
+}
+
+/* Very Small Mobile */
+@media (max-width: 480px) {
+  :root {
+    --cv-scale: 0.45;
+  }
+
+  .skill-item-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .skill-item-row select {
+    width: 100%;
+  }
+
+  .panel-actions {
+    gap: 0.5rem;
+  }
+  
+  .btn-export, .btn-reset {
+    gap: 0.4rem;
+  }
+}
+
+/* Extra Small Mobile (iPhone SE etc) */
+@media (max-width: 400px) {
+  :root {
+    --cv-scale: 0.38;
+  }
+
+  .panel-actions button span {
+    display: none; /* Only icons on very narrow screens */
+  }
+
+  .btn-export, .btn-reset {
+    min-width: 50px;
+  }
 }

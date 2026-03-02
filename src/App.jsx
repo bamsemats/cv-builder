@@ -9,7 +9,7 @@ import ImportCV from "./components/forms/ImportCV";
 import ModernTemplate from "./components/templates/ModernTemplate";
 import MinimalistTemplate from "./components/templates/MinimalistTemplate";
 import ExecutiveTemplate from "./components/templates/ExecutiveTemplate";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, Eye, Edit3, Trash2 } from "lucide-react";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import "./App.css";
@@ -20,6 +20,7 @@ function App() {
     return saved ? JSON.parse(saved) : defaultCV;
   });
   const [isExporting, setIsExporting] = useState(false);
+  const [activeTab, setActiveTab] = useState("edit"); // "edit" or "preview"
 
   useEffect(() => {
     localStorage.setItem("cv-data", JSON.stringify(cvData));
@@ -171,9 +172,27 @@ function App() {
   };
 
   return (
-    <div className="app-container">
+    <div className={`app-container ${activeTab}-active`}>
+      {/* Mobile Toggle Bar */}
+      <nav className="mobile-nav">
+        <button 
+          className={activeTab === "edit" ? "active" : ""} 
+          onClick={() => setActiveTab("edit")}
+        >
+          <Edit3 size={20} />
+          <span>Edit</span>
+        </button>
+        <button 
+          className={activeTab === "preview" ? "active" : ""} 
+          onClick={() => setActiveTab("preview")}
+        >
+          <Eye size={20} />
+          <span>Preview</span>
+        </button>
+      </nav>
+
       {/* Control Panel (Dark Theme) */}
-      <aside className="control-panel">
+      <aside className={`control-panel ${activeTab === "edit" ? "visible" : "hidden"}`}>
         <header className="panel-header">
           <h1>CV Architect</h1>
           <p>Professional CV Builder</p>
@@ -220,20 +239,21 @@ function App() {
             ) : (
               <Download size={18} />
             )}
-            {isExporting ? "Exporting..." : "Export PDF"}
+            <span>{isExporting ? "Exporting..." : "Export PDF"}</span>
           </button>
           
           <button 
             className="btn-reset"
             onClick={handleReset}
           >
-            Reset to Defaults
+            <Trash2 size={18} className="btn-reset-icon" />
+            <span>Reset to Defaults</span>
           </button>
         </div>
       </aside>
 
       {/* Preview Pane (Light Theme) */}
-      <main className="preview-pane">
+      <main className={`preview-pane ${activeTab === "preview" ? "visible" : "hidden"}`}>
         <div className="preview-container" id="cv-preview">
           {renderTemplate()}
         </div>
