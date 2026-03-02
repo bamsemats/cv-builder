@@ -9,6 +9,8 @@ import ImportCV from "./components/forms/ImportCV";
 import ModernTemplate from "./components/templates/ModernTemplate";
 import MinimalistTemplate from "./components/templates/MinimalistTemplate";
 import ExecutiveTemplate from "./components/templates/ExecutiveTemplate";
+import AcademicTemplate from "./components/templates/AcademicTemplate";
+import ProfessionalTemplate from "./components/templates/ProfessionalTemplate";
 import { Download, Loader2, Eye, Edit3, Trash2 } from "lucide-react";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
@@ -165,6 +167,10 @@ function App() {
         return <MinimalistTemplate data={cvData} />;
       case "executive":
         return <ExecutiveTemplate data={cvData} />;
+      case "academic":
+        return <AcademicTemplate data={cvData} />;
+      case "professional":
+        return <ProfessionalTemplate data={cvData} />;
       case "modern":
       default:
         return <ModernTemplate data={cvData} />;

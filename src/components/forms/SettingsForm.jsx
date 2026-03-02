@@ -6,6 +6,8 @@ const SettingsForm = ({ settings, onUpdate }) => {
     { id: "modern", name: "Modern (Sidebar)", icon: <Layout size={16} /> },
     { id: "minimalist", name: "Minimalist (Single)", icon: <Layout size={16} /> },
     { id: "executive", name: "Executive (Traditional)", icon: <Layout size={16} /> },
+    { id: "academic", name: "Academic (Entry-Level)", icon: <Layout size={16} /> },
+    { id: "professional", name: "Corporate (Sophisticated)", icon: <Layout size={16} /> },
   ];
 
   const colors = [
